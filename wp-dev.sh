@@ -8,7 +8,7 @@ cd ${PROJECT}
 
 mkdir db_data
 mkdir wordpress
-git clone git@github.com:markjaquith/WordPress-Skeleton.git wordpress
+git clone git@github.com:markjaquith/WordPress-Skeleton.git ${PROJECT}/wordpress
 
 cat << EOF > docker-compose.yml
 version: '3.3'

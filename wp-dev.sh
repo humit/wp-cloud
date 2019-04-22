@@ -1,17 +1,18 @@
 #!/bin/bash
 
 # EDIT ME
-PROJECT="casinogratis"
-PROJECT_URL="new.casinogratis.io"
-GIT_REPO="git@github.com:humit/casinogratis-wp.git"
+PROJECT="new_project"
+PROJECT_URL="new.myproject.com"
 
+source .env
+#GIT_REPO="git@github.com:humit/casinogratis-wp.git"
 
-WORDPRESS_DB_HOST=apuestastips-prod.cqshofuoyhlw.eu-central-1.rds.amazonaws.com
-WORDPRESS_DB_USER=wordpress
-WORDPRESS_DB_PASSWORD=wr0thPr3sSh
-WORDPRESS_DB_NAME=casinogratis_csngratis
-WORDPRESS_TABLE_PREFIX=wphh_
-WORDPRESS_DEBUG=1
+#WORDPRESS_DB_HOST=apuestastips-prod.cqshofuoyhlw.eu-central-1.rds.amazonaws.com
+#WORDPRESS_DB_USER=wordpress
+#WORDPRESS_DB_PASSWORD=wr0thPr3sSh
+#WORDPRESS_DB_NAME=casinogratis_csngratis
+#WORDPRESS_TABLE_PREFIX=wphh_
+#WORDPRESS_DEBUG=1
 
 ### DO NOT EDIT BELOW THIS LINE ###
 
@@ -99,23 +100,23 @@ services:
        - "80:80"
      restart: always
      environment:
-       - ${WORDPRESS_DB_HOST:-db:3306}
-       - ${WORDPRESS_DB_USER:-wordpress}
-       - ${WORDPRESS_DB_PASSWORD:-wordpress}
-       - ${WORDPRESS_DB_NAME:-wordpress}
+       - WORDPRESS_DB_HOST=\${WORDPRESS_DB_HOST:-db:3306}
+       - WORDPRESS_DB_USER=\${WORDPRESS_DB_USER:-wordpress}
+       - WORDPRESS_DB_PASSWORD=\${WORDPRESS_DB_PASSWORD:-wordpress}
+       - WORDPRESS_DB_NAME=\${WORDPRESS_DB_NAME:-wordpress}
      volumes:
        - ./wordpress:/var/www/html
    nginx:
-     image: nginx:${NGINX_VERSION:-latest}
+     image: nginx:\${NGINX_VERSION:-latest}
      container_name: nginx
      ports:
        - '443:443'
      volumes:
-       - ${NGINX_CONF_DIR:-./nginx}:/etc/nginx/conf.d
-       - ${NGINX_LOG_DIR:-./logs/nginx}:/var/log/nginx
-       - ${WORDPRESS_DATA_DIR:-./wordpress}:/var/www/html
-       - ${SSL_CERTS_DIR:-./certs}:/etc/letsencrypt
-       - ${SSL_CERTS_DATA_DIR:-./certs-data}:/data/letsencrypt
+       - \${NGINX_CONF_DIR:-./nginx}:/etc/nginx/conf.d
+       - \${NGINX_LOG_DIR:-./logs/nginx}:/var/log/nginx
+       - \${WORDPRESS_DATA_DIR:-./wordpress}:/var/www/html
+       - \${SSL_CERTS_DIR:-./certs}:/etc/letsencrypt
+       - \${SSL_CERTS_DATA_DIR:-./certs-data}:/data/letsencrypt
      depends_on:
        - wordpress
      restart: always

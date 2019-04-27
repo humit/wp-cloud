@@ -1,26 +1,27 @@
 #!/bin/bash
 
 # EDIT ME
-PROJECT="new_project"
-PROJECT_URL="new.myproject.com"
+PROJECT="newproject"
+PROJECT_URL="new.project.com"
+GIT_REPO="git@github.com:alpharatings/newproject-wp.git"
 
-source .env
-#GIT_REPO="git@github.com:humit/casinogratis-wp.git"
+WORDPRESS_DB_HOST="newproject-prod.cqshofuoyhlw.eu-central-1.rds.amazonaws.com"
+WORDPRESS_DB_USER="wordpress"
+WORDPRESS_DB_PASSWORD="password"
+WORDPRESS_DB_NAME="new_project_db"
+WORDPRESS_TABLE_PREFIX="wpnp_"
+WORDPRESS_DEBUG="1"
+CDN_S3_BUCKET="newproject-prod"
+CDN_S3_KEY="CDNKEY"
+CDN_S3_REGION="eu-central-1"
+CDN_S3_SECRET="CDNSECRET"
 
-#WORDPRESS_DB_HOST=apuestastips-prod.cqshofuoyhlw.eu-central-1.rds.amazonaws.com
-#WORDPRESS_DB_USER=wordpress
-#WORDPRESS_DB_PASSWORD=wr0thPr3sSh
-#WORDPRESS_DB_NAME=casinogratis_csngratis
-#WORDPRESS_TABLE_PREFIX=wphh_
-#WORDPRESS_DEBUG=1
-
-### DO NOT EDIT BELOW THIS LINE ###
+SSH_PRIVATE_KEY="PRIVATEKEY"
 
 NGINX_CONF_DIR=./nginx
 NGINX_LOG_DIR=./logs/nginx
 SSL_CERTS_DIR=./certs
 SSL_CERTS_DATA_DIR=./certs-data
-
 
 mklog(){
 echo -e "$(date)\t${@}"
@@ -37,10 +38,11 @@ mklog "Creating directory structure..."
 mkdir -p ${PROJECT}/db_data ${PROJECT}/wordpress ${PROJECT}/nginx ${PROJECT}/logs/nginx \
          ${PROJECT}/certs/live/${PROJECT_URL} ${PROJECT}/certs-data
 
-if ! [ -z $GIT_REPO ];then
- mklog "Cloning ${GIT_REPO}"
- git clone ${GIT_REPO} ${PROJECT}/wordpress
-fi
+# DEBUG FIX ME
+#if ! [ -z $GIT_REPO ];then
+# mklog "Cloning ${GIT_REPO}"
+# git clone ${GIT_REPO} ${PROJECT}/wordpress
+#fi
 
 mklog "Creating nginx configuration..."
 cat << EOF > ${PROJECT}/nginx/default.conf
@@ -93,17 +95,25 @@ services:
        MYSQL_USER: wordpress
        MYSQL_PASSWORD: wordpress
    wordpress:
+     container_name: wordpress
      depends_on:
        - db
-     image: wordpress:latest
+     image: humit/wordpress-dynamic:latest
      ports:
        - "80:80"
      restart: always
      environment:
-       - WORDPRESS_DB_HOST=\${WORDPRESS_DB_HOST:-db:3306}
-       - WORDPRESS_DB_USER=\${WORDPRESS_DB_USER:-wordpress}
-       - WORDPRESS_DB_PASSWORD=\${WORDPRESS_DB_PASSWORD:-wordpress}
-       - WORDPRESS_DB_NAME=\${WORDPRESS_DB_NAME:-wordpress}
+       - WORDPRESS_DB_HOST=\${WORDPRESS_DB_HOST:-$WORDPRESS_DB_HOST}
+       - WORDPRESS_DB_USER=\${WORDPRESS_DB_USER:-$WORDPRESS_DB_USER}
+       - WORDPRESS_DB_PASSWORD=\${WORDPRESS_DB_PASSWORD:-$WORDPRESS_DB_PASSWORD}
+       - WORDPRESS_DB_NAME=\${WORDPRESS_DB_NAME:-$WORDPRESS_DB_NAME}
+       - WORDPRESS_TABLE_PREFIX=\${WORDPRESS_TABLE_PREFIX:-$WORDPRESS_TABLE_PREFIX}
+       - SSH_PRIVATE_KEY=\${SSH_PRIVATE_KEY:-$SSH_PRIVATE_KEY}
+       - GIT_REPO=\${GIT_REPO:-$GIT_REPO}
+       - CDN_S3_KEY=\${CDN_S3_KEY:-$CDN_S3_KEY}
+       - CDN_S3_SECRET=\${CDN_S3_SECRET:-$CDN_S3_SECRET}
+       - CDN_S3_BUCKET=\${CDN_S3_BUCKET:-$CDN_S3_BUCKET}
+       - CDN_S3_REGION=\${CDN_S3_REGION:-$CDN_S3_REGION}
      volumes:
        - ./wordpress:/var/www/html
    nginx:
@@ -126,4 +136,4 @@ mklog "Creating SSL/TLS Certificates..."
 mkcert
 mklog "Running containers... hit CTRL+C to exit"
 cd ${PROJECT}
-docker-compose up
+#docker-compose up

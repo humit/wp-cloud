@@ -1,22 +1,9 @@
 #!/bin/bash
 
 # EDIT ME
-PROJECT="newproject"
-PROJECT_URL="new.project.com"
-GIT_REPO="git@github.com:alpharatings/newproject-wp.git"
-
-WORDPRESS_DB_HOST="newproject-prod.cqshofuoyhlw.eu-central-1.rds.amazonaws.com"
-WORDPRESS_DB_USER="wordpress"
-WORDPRESS_DB_PASSWORD="password"
-WORDPRESS_DB_NAME="new_project_db"
-WORDPRESS_TABLE_PREFIX="wpnp_"
-WORDPRESS_DEBUG="1"
-CDN_S3_BUCKET="newproject-prod"
-CDN_S3_KEY="CDNKEY"
-CDN_S3_REGION="eu-central-1"
-CDN_S3_SECRET="CDNSECRET"
-
-SSH_PRIVATE_KEY="PRIVATEKEY"
+PROJECT="demo"
+PROJECT_URL="demo.snappyselling.com"
+GIT_REPO="git@git.snappyselling.com:other/demo.git"
 
 NGINX_CONF_DIR=./nginx
 NGINX_LOG_DIR=./logs/nginx
@@ -35,14 +22,13 @@ mkcert(){
 }
 
 mklog "Creating directory structure..."
-mkdir -p ${PROJECT}/db_data ${PROJECT}/wordpress ${PROJECT}/nginx ${PROJECT}/logs/nginx \
+mkdir -p ${PROJECT}/db_data ${PROJECT}/nginx ${PROJECT}/logs/nginx \
          ${PROJECT}/certs/live/${PROJECT_URL} ${PROJECT}/certs-data
 
-# DEBUG FIX ME
-#if ! [ -z $GIT_REPO ];then
-# mklog "Cloning ${GIT_REPO}"
-# git clone ${GIT_REPO} ${PROJECT}/wordpress
-#fi
+if ! [ -z $GIT_REPO ];then
+ mklog "Cloning ${GIT_REPO}"
+ git clone ${GIT_REPO} ${PROJECT}/
+fi
 
 mklog "Creating nginx configuration..."
 cat << EOF > ${PROJECT}/nginx/default.conf
@@ -65,13 +51,13 @@ server {
     resolver                  8.8.8.8 8.8.4.4;
 
     root /var/www/html;
-    index index.php;
+    index /;
 
     access_log /var/log/nginx/access.log;
     error_log /var/log/nginx/error.log;
 
     location / {
-        proxy_pass http://wordpress:80;
+        proxy_pass http://demo:5001;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -84,52 +70,50 @@ mklog "Creating docker-compose.yml"
 cat << EOF > ${PROJECT}/docker-compose.yml
 version: '3.3'
 services:
-   db:
-     image: mysql:5.7
-     volumes:
-       - ./db_data:/var/lib/mysql
-     restart: always
-     environment:
-       MYSQL_ROOT_PASSWORD: somewordpress
-       MYSQL_DATABASE: wordpress
-       MYSQL_USER: wordpress
-       MYSQL_PASSWORD: wordpress
-   wordpress:
-     container_name: wordpress
-     depends_on:
-       - db
-     image: humit/wordpress-dynamic:latest
-     ports:
-       - "80:80"
-     restart: always
-     environment:
-       - WORDPRESS_DB_HOST=\${WORDPRESS_DB_HOST:-$WORDPRESS_DB_HOST}
-       - WORDPRESS_DB_USER=\${WORDPRESS_DB_USER:-$WORDPRESS_DB_USER}
-       - WORDPRESS_DB_PASSWORD=\${WORDPRESS_DB_PASSWORD:-$WORDPRESS_DB_PASSWORD}
-       - WORDPRESS_DB_NAME=\${WORDPRESS_DB_NAME:-$WORDPRESS_DB_NAME}
-       - WORDPRESS_TABLE_PREFIX=\${WORDPRESS_TABLE_PREFIX:-$WORDPRESS_TABLE_PREFIX}
-       - SSH_PRIVATE_KEY=\${SSH_PRIVATE_KEY:-$SSH_PRIVATE_KEY}
-       - GIT_REPO=\${GIT_REPO:-$GIT_REPO}
-       - CDN_S3_KEY=\${CDN_S3_KEY:-$CDN_S3_KEY}
-       - CDN_S3_SECRET=\${CDN_S3_SECRET:-$CDN_S3_SECRET}
-       - CDN_S3_BUCKET=\${CDN_S3_BUCKET:-$CDN_S3_BUCKET}
-       - CDN_S3_REGION=\${CDN_S3_REGION:-$CDN_S3_REGION}
-     volumes:
-       - ./wordpress:/var/www/html
-   nginx:
-     image: nginx:\${NGINX_VERSION:-latest}
-     container_name: nginx
-     ports:
-       - '443:443'
-     volumes:
-       - \${NGINX_CONF_DIR:-./nginx}:/etc/nginx/conf.d
-       - \${NGINX_LOG_DIR:-./logs/nginx}:/var/log/nginx
-       - \${WORDPRESS_DATA_DIR:-./wordpress}:/var/www/html
-       - \${SSL_CERTS_DIR:-./certs}:/etc/letsencrypt
-       - \${SSL_CERTS_DATA_DIR:-./certs-data}:/data/letsencrypt
-     depends_on:
-       - wordpress
-     restart: always
+    demo:
+        container_name: demo
+        environment:
+          - ASPNETCORE_ENVIRONMENT=Development
+          - ASPNETCORE_URLS=https://+:443;http://+:80
+          - ASPNETCORE_HTTPS_PORT=443
+        image: demo
+        restart: always
+        build:
+          context: .
+          dockerfile: demo/Demo/Dockerfile
+        ports:
+          - "5000:80"
+          - "5001:443"
+        depends_on:
+          - db
+    db:
+        image: postgres
+        restart: always
+        container_name: db
+        hostname: db
+        ports:
+          - "5432:5432"
+        environment:
+          - POSTGRES_PASSWORD=local_user+2019*
+          - POSTGRES_USER=local_user
+        healthcheck:
+          test: ["CMD-SHELL", "pg_isready -U local_user"]
+          interval: 10s
+          timeout: 5s
+          retries: 5
+    nginx:
+        image: nginx:${NGINX_VERSION:-latest}
+        container_name: nginx
+        ports:
+          - '443:443'
+        volumes:
+          - ${NGINX_CONF_DIR:-./nginx}:/etc/nginx/conf.d
+          - ${NGINX_LOG_DIR:-./logs/nginx}:/var/log/nginx
+          - ${SSL_CERTS_DIR:-./certs}:/etc/letsencrypt
+          - ${SSL_CERTS_DATA_DIR:-./certs-data}:/data/letsencrypt
+        depends_on:
+          - demo
+        restart: always
 EOF
 
 mklog "Creating SSL/TLS Certificates..."

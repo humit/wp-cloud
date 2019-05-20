@@ -2,16 +2,17 @@
 
 # EDIT ME
 PROJECT="newproject"
-PROJECT_URL="new.project.com"
-GIT_REPO="git@github.com:alpharatings/newproject-wp.git"
 
-WORDPRESS_DB_HOST="newproject-prod.cqshofuoyhlw.eu-central-1.rds.amazonaws.com"
+PROJECT_URL="new.${PROJECT}.com"
+GIT_REPO="git@github.com:alpharatings/${PROJECT}-wp.git"
+
+WORDPRESS_DB_HOST="apuestastips-prod.cqshofuoyhlw.eu-central-1.rds.amazonaws.com"
 WORDPRESS_DB_USER="wordpress"
 WORDPRESS_DB_PASSWORD="password"
-WORDPRESS_DB_NAME="new_project_db"
-WORDPRESS_TABLE_PREFIX="wpnp_"
+WORDPRESS_DB_NAME="newproject_db"
+WORDPRESS_TABLE_PREFIX="tblpfx_"
 WORDPRESS_DEBUG="1"
-CDN_S3_BUCKET="newproject-prod"
+CDN_S3_BUCKET="${PROJECT}-prod"
 CDN_S3_KEY="CDNKEY"
 CDN_S3_REGION="eu-central-1"
 CDN_S3_SECRET="CDNSECRET"

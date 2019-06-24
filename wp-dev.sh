@@ -1,22 +1,20 @@
 #!/bin/bash
 
 # EDIT ME
-PROJECT="newproject"
-PROJECT_URL="new.project.com"
-GIT_REPO="git@github.com:alpharatings/newproject-wp.git"
+PROJECT="myproject"
+PROJECT_URL="${PROJECT}.com"
+GIT_REPO="git@github.com:alpharatings/${PROJECT}-wp.git"
 
-WORDPRESS_DB_HOST="newproject-prod.cqshofuoyhlw.eu-central-1.rds.amazonaws.com"
+WORDPRESS_DB_HOST="apuestastips-prod.cqshofuoyhlw.eu-central-1.rds.amazonaws.com"
 WORDPRESS_DB_USER="wordpress"
-WORDPRESS_DB_PASSWORD="password"
-WORDPRESS_DB_NAME="new_project_db"
-WORDPRESS_TABLE_PREFIX="wpnp_"
+WORDPRESS_DB_PASSWORD=""
+WORDPRESS_DB_NAME=""
+WORDPRESS_TABLE_PREFIX=""
 WORDPRESS_DEBUG="1"
-CDN_S3_BUCKET="newproject-prod"
-CDN_S3_KEY="CDNKEY"
+CDN_S3_BUCKET="${PROJECT}-prod"
+CDN_S3_KEY=""
 CDN_S3_REGION="eu-central-1"
-CDN_S3_SECRET="CDNSECRET"
-
-SSH_PRIVATE_KEY="PRIVATEKEY"
+CDN_S3_SECRET=""
 
 NGINX_CONF_DIR=./nginx
 NGINX_LOG_DIR=./logs/nginx
@@ -38,11 +36,8 @@ mklog "Creating directory structure..."
 mkdir -p ${PROJECT}/db_data ${PROJECT}/wordpress ${PROJECT}/nginx ${PROJECT}/logs/nginx \
          ${PROJECT}/certs/live/${PROJECT_URL} ${PROJECT}/certs-data
 
-# DEBUG FIX ME
-#if ! [ -z $GIT_REPO ];then
-# mklog "Cloning ${GIT_REPO}"
-# git clone ${GIT_REPO} ${PROJECT}/wordpress
-#fi
+mklog "Cloning $GIT_REPO into ${PROJECT}/wordpress"
+git clone $GIT_REPO ${PROJECT}/wordpress
 
 mklog "Creating nginx configuration..."
 cat << EOF > ${PROJECT}/nginx/default.conf
@@ -98,7 +93,7 @@ services:
      container_name: wordpress
      depends_on:
        - db
-     image: humit/wordpress-dynamic:latest
+     image: 206662246910.dkr.ecr.eu-central-1.amazonaws.com/${PROJECT}-wp:latest
      ports:
        - "80:80"
      restart: always
@@ -115,7 +110,13 @@ services:
        - CDN_S3_BUCKET=\${CDN_S3_BUCKET:-$CDN_S3_BUCKET}
        - CDN_S3_REGION=\${CDN_S3_REGION:-$CDN_S3_REGION}
      volumes:
-       - ./wordpress:/var/www/html
+       - ./wordpress/wordpress:/var/www/html
+   memcache:
+     container_name: memcache
+     image: memcached:alpine
+     ports:
+       - 11211:11211
+     restart: always
    nginx:
      image: nginx:\${NGINX_VERSION:-latest}
      container_name: nginx

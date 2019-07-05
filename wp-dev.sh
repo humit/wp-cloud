@@ -6,6 +6,7 @@ PROJECT="newproject"
 PROJECT_URL="new.${PROJECT}.com"
 GIT_REPO="git@github.com:alpharatings/${PROJECT}-wp.git"
 
+WORDPRESS_IMAGE="206662246910.dkr.ecr.eu-central-1.amazonaws.com/${PROJECT}-wp"
 WORDPRESS_DB_HOST="apuestastips-prod.cqshofuoyhlw.eu-central-1.rds.amazonaws.com"
 WORDPRESS_DB_USER="wordpress"
 WORDPRESS_DB_PASSWORD="password"
@@ -39,11 +40,7 @@ mklog "Creating directory structure..."
 mkdir -p ${PROJECT}/db_data ${PROJECT}/wordpress ${PROJECT}/nginx ${PROJECT}/logs/nginx \
          ${PROJECT}/certs/live/${PROJECT_URL} ${PROJECT}/certs-data
 
-# DEBUG FIX ME
-#if ! [ -z $GIT_REPO ];then
-# mklog "Cloning ${GIT_REPO}"
-# git clone ${GIT_REPO} ${PROJECT}/wordpress
-#fi
+git clone ${GIT_REPO} ${PROJECT}/wordpress
 
 mklog "Creating nginx configuration..."
 cat << EOF > ${PROJECT}/nginx/default.conf
@@ -99,7 +96,7 @@ services:
      container_name: wordpress
      depends_on:
        - db
-     image: humit/wordpress-dynamic:latest
+     image: $WORDPRESS_IMAGE
      ports:
        - "80:80"
      restart: always
@@ -137,4 +134,4 @@ mklog "Creating SSL/TLS Certificates..."
 mkcert
 mklog "Running containers... hit CTRL+C to exit"
 cd ${PROJECT}
-#docker-compose up
+docker-compose up

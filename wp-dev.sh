@@ -13,6 +13,7 @@ WORDPRESS_TABLE_PREFIX=""
 WORDPRESS_DEBUG="1"
 CDN_S3_BUCKET="${PROJECT}-prod"
 CDN_S3_KEY=""
+WORDPRESS_IMAGE="206662246910.dkr.ecr.eu-central-1.amazonaws.com/${PROJECT}-wp"
 CDN_S3_REGION="eu-central-1"
 CDN_S3_SECRET=""
 
@@ -37,7 +38,7 @@ mkdir -p ${PROJECT}/db_data ${PROJECT}/wordpress ${PROJECT}/nginx ${PROJECT}/log
          ${PROJECT}/certs/live/${PROJECT_URL} ${PROJECT}/certs-data
 
 mklog "Cloning $GIT_REPO into ${PROJECT}/wordpress"
-git clone $GIT_REPO ${PROJECT}/wordpress
+git clone ${GIT_REPO} ${PROJECT}/wordpress
 
 mklog "Creating nginx configuration..."
 cat << EOF > ${PROJECT}/nginx/default.conf
@@ -79,21 +80,9 @@ mklog "Creating docker-compose.yml"
 cat << EOF > ${PROJECT}/docker-compose.yml
 version: '3.3'
 services:
-   db:
-     image: mysql:5.7
-     volumes:
-       - ./db_data:/var/lib/mysql
-     restart: always
-     environment:
-       MYSQL_ROOT_PASSWORD: somewordpress
-       MYSQL_DATABASE: wordpress
-       MYSQL_USER: wordpress
-       MYSQL_PASSWORD: wordpress
    wordpress:
      container_name: wordpress
-     depends_on:
-       - db
-     image: 206662246910.dkr.ecr.eu-central-1.amazonaws.com/${PROJECT}-wp:latest
+     image: $WORDPRESS_IMAGE
      ports:
        - "80:80"
      restart: always
@@ -137,4 +126,4 @@ mklog "Creating SSL/TLS Certificates..."
 mkcert
 mklog "Running containers... hit CTRL+C to exit"
 cd ${PROJECT}
-#docker-compose up
+docker-compose up

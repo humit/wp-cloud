@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # EDIT ME
-PROJECT="myproject"
+PROJECT="CHANGEME"
 PROJECT_URL="${PROJECT}.com"
-GIT_REPO="git@github.com:humit/${PROJECT}-wp.git"
+GIT_REPO="git@github.com:humit/skeleton-wp.git"
 
 WORDPRESS_DB_HOST="CHANGEME"
 WORDPRESS_DB_USER="wordpress"

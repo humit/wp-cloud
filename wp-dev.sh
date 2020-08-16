@@ -3,9 +3,9 @@
 # EDIT ME
 PROJECT="myproject"
 PROJECT_URL="${PROJECT}.com"
-GIT_REPO="git@github.com:alpharatings/${PROJECT}-wp.git"
+GIT_REPO="git@github.com:humit/${PROJECT}-wp.git"
 
-WORDPRESS_DB_HOST="apuestastips-prod.cqshofuoyhlw.eu-central-1.rds.amazonaws.com"
+WORDPRESS_DB_HOST="CHANGEME"
 WORDPRESS_DB_USER="wordpress"
 WORDPRESS_DB_PASSWORD=""
 WORDPRESS_DB_NAME=""
@@ -13,8 +13,8 @@ WORDPRESS_TABLE_PREFIX=""
 WORDPRESS_DEBUG="1"
 CDN_S3_BUCKET="${PROJECT}-prod"
 CDN_S3_KEY=""
-WORDPRESS_IMAGE="206662246910.dkr.ecr.eu-central-1.amazonaws.com/${PROJECT}-wp"
-CDN_S3_REGION="eu-central-1"
+WORDPRESS_IMAGE="CHANGEME/${PROJECT}-wp"
+CDN_S3_REGION="CHANGEME"
 CDN_S3_SECRET=""
 
 NGINX_CONF_DIR=./nginx

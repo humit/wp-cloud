@@ -33,7 +33,7 @@ cd wp-cloud/
 
 Ekranda `apache2 -D FOREGROUND` Görene kadar bekle.
 
-# http://127.0.0.1 Adresine git
+http://127.0.0.1 Adresine git
 
 [ Aşagıdaki gibi veriler gir ve sıfır bir wordpress kurulumu yap ]
 

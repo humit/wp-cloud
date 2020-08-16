@@ -1,5 +1,7 @@
 This README describes the required steps to create a new local WordPress for development purposes:
 
+Note that the wp-dev.sh script needs editing, please see the lines containing "CHANGEME".
+
 - Run the following in terminal screen:
 
 ```sh

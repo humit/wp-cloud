@@ -1,4 +1,4 @@
-This README describes the required steps to create a new local WordPress for development purposes:
+This README describes the required steps to create a new local WordPress container for development purposes:
 
 Note that the wp-dev.sh script needs editing, please see the lines containing "CHANGEME".
 
